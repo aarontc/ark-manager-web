@@ -75,7 +75,7 @@ class ApiApp < Grape::API
   end
 
   get 'players/list' do
-
+    SchedulerController.new('main').get_player_list
   end
 
 end

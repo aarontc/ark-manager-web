@@ -1,14 +1,18 @@
 require_relative '../config/environment'
 require_relative '../api/scheduler_controller'
 
-$scheduler.every '1h', first_at: Time.now + 10 do
-  config_mod_list = SchedulerController.new('main').get_mod_status
-  modified_config_mod_list = config_mod_list
+$scheduler.every '15m', first_at: Time.now + 10 do
+  memory_mod_list = Repository.for(:mod_list).all
   fs_mod_list = Dir["#{USER_HOME}/ARK/ShooterGame/Content/Mods/*.mod"]
   fs_mod_list.map! {|mod| File.basename(mod).gsub!('.mod', '') }
   fs_mod_list.delete('111111111')
+
+  json_file_mod_list = JSON.parse File.read "#{WORKING_DIR}/config/mod_list.json", :symbolize_names => true
+  
+  memory_mod_list.select
+
   fs_mod_list.each  do |mod_id|
-    unless config_mod_list.has_key? mod_id
+    unless json_file_mod_list.has_key? mod_id
       modified_config_mod_list[mod_id] = {
           version: Base64.encode64('Mod Not Tracked Yet').gsub!(/\n/, ''),
           last_updated: Time.now.utc.strftime('%m%d%Y%H%M%S')
@@ -72,4 +76,9 @@ $scheduler.every '15m', first_at: Time.now + 5 do
       SchedulerController.new('main').run_ark_manager_start_server
     end
   end
+end
+
+$scheduler.every '30s', first_at: Time.now + 5 do
+  Repository.for(:mod_list).create(id: 123, name: 'banana')
+  puts Repository.for(:mod_list).all
 end

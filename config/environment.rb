@@ -1,10 +1,28 @@
 require 'oj'
 require 'json'
 require 'mkmf'
+require 'hashie'
 require 'dalli'
 require 'logger'
 require 'base64'
 require 'rufus-scheduler'
+require_relative '../lib/repository'
+require_relative '../lib/mod_repository'
+
+if File.exists?("#{WORKING_DIR}/config/env_config.json")
+  @env_config = Oj.load_file("#{WORKING_DIR}/config/env_config.json", Hash.new)
+  @env_config.each_pair { |key,value|  ENV[key] = value  }
+else
+  env_hash = {
+      RACK_ENV: 'production',
+      LISTENING_IP: '0.0.0.0',
+      LISTENING_PORT: '8080',
+      MEMCACHED_IP: '127.0.0.1',
+      MEMCACHED_PORT: '11211',
+      DOMAIN_NAME: 'localhost'
+  }
+  @env_config = Hashie::Mash.parse(env_hash)
+end
 
 WORKING_DIR       = File.dirname(File.expand_path('..', __FILE__)) unless defined?(WORKING_DIR)
 EGREP_EXEC        = find_executable 'egrep'
@@ -12,16 +30,20 @@ CURL_EXEC         = find_executable 'curl'
 USER_HOME         = Dir.home unless defined?(USER_HOME)
 RACK_ENV          = ENV.fetch('RACK_ENV', 'development')
 ARK_MANAGER_CLI   = find_executable('arkmanager', "#{USER_HOME}/bin") unless defined?(ARK_MANAGER_CLI)
-SERVER_IP_ADDRESS = ENV.fetch('LISTENING_IP', '0.0.0.0')
+SERVER_IP         = ENV.fetch('LISTENING_IP', '0.0.0.0')
+SERVER_PORT       = ENV.fetch('LISTENING_PORT', '8080')
+MEMCACHED_IP      = ENV.fetch('MEMCACHED_IP', '127.0.0.1')
+MEMCACHED_PORT    = ENV.fetch('MEMCACHED_PORT', '11211')
+DOMAIN_NAME       = ENV.fetch('DOMAIN_NAME', 'localhost')
+UNICORN_STDOUT    = ENV.fetch('UNICORN_STDOUT')
+UNICORN_STDERR    = ENV.fetch('UNICORN_STDERR')
 
-if File.exists?("#{WORKING_DIR}/config/env_config.json")
-  Oj.load_file("#{WORKING_DIR}/config/env_config.json", Hash.new).each_pair { |key,value|  ENV[key] = value  }
+unless File.exists?("#{WORKING_DIR}/config/env_config.json")
+  File.open("#{WORKING_DIR}/config/env_config.json", 'w') do |f|
+    f.write()
+  end
 end
 
-DOMAIN_NAME = ENV.fetch('DOMAIN_NAME', 'localhost')
-
-raise 'I was unable to find arkmanager in your path!! please run "bundle exec rake install_server_tools"' unless ARK_MANAGER_CLI
-raise 'I was unable to find memcached!!! please have your system administrator install memcached' unless find_executable('memcached')
 
 $logger = Logger.new(STDOUT)
 $logger.datetime_format = '%m-%d-%Y %H:%M:%S'

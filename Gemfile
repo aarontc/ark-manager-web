@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 source 'https://rubygems.org'
-
-# gem "rails"
-ruby '2.3.1'
+ruby '2.4.1'
 
 gem 'sinatra'
 gem 'unicorn'
@@ -14,6 +12,7 @@ gem 'dalli'
 gem 'rake'
 gem 'oj'
 gem 'trollop'
+gem 'hashie'
 
 group :development do
   gem 'pkgr'

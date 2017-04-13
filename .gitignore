@@ -1,6 +1,5 @@
 .bundle/
 .idea/
-bin/
 public/components/
 log/*
 !log/.git-keep
@@ -10,3 +9,4 @@ tmp/*
 /config/mod_list*
 /config/schedules*
 /config/env_config*
+/bin/
