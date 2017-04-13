@@ -24,6 +24,7 @@ else
   @env_config = Hashie::Mash.parse(env_hash)
 end
 
+ENV["TZ"] = ENV.fetch("TZ", "Etc/UTC")
 WORKING_DIR       = File.dirname(File.expand_path('..', __FILE__)) unless defined?(WORKING_DIR)
 EGREP_EXEC        = find_executable 'egrep'
 CURL_EXEC         = find_executable 'curl'

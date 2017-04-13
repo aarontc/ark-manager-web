@@ -13,6 +13,7 @@ gem 'rake'
 gem 'oj'
 gem 'trollop'
 gem 'hashie'
+gem 'tzinfo-data'
 
 group :development do
   gem 'pkgr'
